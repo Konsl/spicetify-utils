@@ -1,0 +1,14 @@
+{
+  "name": "spicetify-utils",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "format": "prettier --write src/"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "prettier": "^3.8.1"
+  },
+  "sideEffects": false
+}
