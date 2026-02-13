@@ -1,6 +1,6 @@
 {
   "name": "spicetify-utils",
-  "module": "index.ts",
+  "module": "src/index.ts",
   "type": "module",
   "scripts": {
     "format": "prettier --write src/"
