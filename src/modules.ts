@@ -2,6 +2,24 @@ import type { ReactForwardRef } from "./types";
 
 type ModuleState = { state: "failed" } | { state: "succeeded"; value: unknown };
 
+/**
+ * Safely converts a value to its string representation.
+ * Some Spotify webpack modules override `toString` to a non-function value,
+ * causing `e.toString()` to throw `TypeError: e.toString is not a function`.
+ * This helper uses `Function.prototype.toString.call()` for functions and
+ * falls back gracefully for other types.
+ */
+function safeToString(value: unknown): string {
+	try {
+		if (typeof value === "function") {
+			return Function.prototype.toString.call(value);
+		}
+		return String(value);
+	} catch {
+		return "";
+	}
+}
+
 export class SpotifyModules {
 	private static webpack: any | null = null;
 	private static require: any | null = null;
@@ -93,8 +111,8 @@ export class SpotifyModules {
 			m =>
 				m &&
 				typeof m === "function" &&
-				m.toString().includes("executeEsperantoCall") &&
-				m.toString().includes("cancelEsperantoCall")
+				safeToString(m).includes("executeEsperantoCall") &&
+				safeToString(m).includes("cancelEsperantoCall")
 		);
 	}
 
@@ -106,11 +124,11 @@ export class SpotifyModules {
 				typeof m === "object" &&
 				m["$$typeof"] === Symbol.for("react.memo") &&
 				typeof m.type === "function" &&
-				m.type.toString().includes("tracks") &&
-				m.type.toString().includes("nrTracks") &&
-				m.type.toString().includes("fetchTracks") &&
-				m.type.toString().includes("itemsCache") &&
-				m.type.toString().includes("initialItems")
+				safeToString(m.type).includes("tracks") &&
+				safeToString(m.type).includes("nrTracks") &&
+				safeToString(m.type).includes("fetchTracks") &&
+				safeToString(m.type).includes("itemsCache") &&
+				safeToString(m.type).includes("initialItems")
 		);
 	}
 
@@ -122,9 +140,9 @@ export class SpotifyModules {
 				typeof m === "object" &&
 				m["$$typeof"] === Symbol.for("react.memo") &&
 				typeof m.type === "function" &&
-				m.type.toString().includes("displayedColumns") &&
-				m.type.toString().includes("albumOrShow") &&
-				m.type.toString().includes("associatedAudioUri")
+				safeToString(m.type).includes("displayedColumns") &&
+				safeToString(m.type).includes("albumOrShow") &&
+				safeToString(m.type).includes("associatedAudioUri")
 		);
 	}
 
@@ -136,8 +154,8 @@ export class SpotifyModules {
 				typeof m === "object" &&
 				"render" in m &&
 				typeof m.render === "function" &&
-				m.render.toString().includes("card-title-") &&
-				m.render.toString().includes("card-subtitle-")
+				safeToString(m.render).includes("card-title-") &&
+				safeToString(m.render).includes("card-subtitle-")
 		) as ReactForwardRef | null;
 	}
 
@@ -147,10 +165,10 @@ export class SpotifyModules {
 			m =>
 				m &&
 				typeof m === "function" &&
-				m.toString().includes("stylisPlugins") &&
-				m.toString().includes("reconstructWithOptions") &&
-				m.toString().includes("disableCSSOMInjection") &&
-				m.toString().includes("disableVendorPrefixes")
+				safeToString(m).includes("stylisPlugins") &&
+				safeToString(m).includes("reconstructWithOptions") &&
+				safeToString(m).includes("disableCSSOMInjection") &&
+				safeToString(m).includes("disableVendorPrefixes")
 		);
 	}
 }
