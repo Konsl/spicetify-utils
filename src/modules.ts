@@ -46,7 +46,13 @@ export class SpotifyModules {
 
 		this.loadedModules = {};
 
-		const cache = Object.keys(this.require.m).map(id => this.require(id));
+		const cache = Object.keys(this.require.m).map(id => {
+			try {
+				return this.require(id);
+			} catch {
+				return undefined;
+			}
+		});
 		this.modules = cache
 			.filter(module => typeof module === "object")
 			.map(module => {
