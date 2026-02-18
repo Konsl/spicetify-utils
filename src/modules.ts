@@ -14,6 +14,13 @@ function safeToString(value: unknown): string {
 	}
 }
 
+function checkFunctionKeywords(obj: unknown, keywords: string[]): boolean {
+	if (typeof obj !== "function") return false;
+	const str = safeToString(obj);
+
+	return keywords.every(k => str.includes(k));
+}
+
 export class SpotifyModules {
 	private static webpack: any | null = null;
 	private static require: any | null = null;
@@ -108,11 +115,7 @@ export class SpotifyModules {
 	public static getCreateTransport(): unknown | null {
 		return this.getValueFiltered(
 			"createTransport",
-			m =>
-				m &&
-				typeof m === "function" &&
-				safeToString(m).includes("executeEsperantoCall") &&
-				safeToString(m).includes("cancelEsperantoCall")
+			m => m && checkFunctionKeywords(m, ["executeEsperantoCall", "cancelEsperantoCall"])
 		);
 	}
 
@@ -123,12 +126,7 @@ export class SpotifyModules {
 				m &&
 				typeof m === "object" &&
 				m["$$typeof"] === Symbol.for("react.memo") &&
-				typeof m.type === "function" &&
-				safeToString(m.type).includes("tracks") &&
-				safeToString(m.type).includes("nrTracks") &&
-				safeToString(m.type).includes("fetchTracks") &&
-				safeToString(m.type).includes("itemsCache") &&
-				safeToString(m.type).includes("initialItems")
+				checkFunctionKeywords(m.type, ["tracks", "nrTracks", "fetchTracks", "itemsCache", "initialItems"])
 		);
 	}
 
@@ -139,10 +137,7 @@ export class SpotifyModules {
 				m &&
 				typeof m === "object" &&
 				m["$$typeof"] === Symbol.for("react.memo") &&
-				typeof m.type === "function" &&
-				safeToString(m.type).includes("displayedColumns") &&
-				safeToString(m.type).includes("albumOrShow") &&
-				safeToString(m.type).includes("associatedAudioUri")
+				checkFunctionKeywords(m.type, ["displayedColumns", "albumOrShow", "associatedAudioUri"])
 		);
 	}
 
@@ -153,9 +148,7 @@ export class SpotifyModules {
 				m &&
 				typeof m === "object" &&
 				"render" in m &&
-				typeof m.render === "function" &&
-				safeToString(m.render).includes("card-title-") &&
-				safeToString(m.render).includes("card-subtitle-")
+				checkFunctionKeywords(m.render, ["card-title-", "card-subtitle-"])
 		) as ReactForwardRef | null;
 	}
 
@@ -164,11 +157,12 @@ export class SpotifyModules {
 			"styleSheetManager",
 			m =>
 				m &&
-				typeof m === "function" &&
-				safeToString(m).includes("stylisPlugins") &&
-				safeToString(m).includes("reconstructWithOptions") &&
-				safeToString(m).includes("disableCSSOMInjection") &&
-				safeToString(m).includes("disableVendorPrefixes")
+				checkFunctionKeywords(m, [
+					"stylisPlugins",
+					"reconstructWithOptions",
+					"disableCSSOMInjection",
+					"disableVendorPrefixes"
+				])
 		);
 	}
 }
