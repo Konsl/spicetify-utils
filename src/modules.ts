@@ -2,13 +2,7 @@ import type { ReactForwardRef } from "./types";
 
 type ModuleState = { state: "failed" } | { state: "succeeded"; value: unknown };
 
-/**
- * Safely converts a value to its string representation.
- * Some Spotify webpack modules override `toString` to a non-function value,
- * causing `e.toString()` to throw `TypeError: e.toString is not a function`.
- * This helper uses `Function.prototype.toString.call()` for functions and
- * falls back gracefully for other types.
- */
+/** some webpack modules override `toString` */
 function safeToString(value: unknown): string {
 	try {
 		if (typeof value === "function") {
