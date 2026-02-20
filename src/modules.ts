@@ -1,4 +1,4 @@
-import type { ReactForwardRef } from "./types";
+import type { HeartACRendererMemo, ReactForwardRef } from "./types";
 
 type ModuleState = { state: "failed" } | { state: "succeeded"; value: unknown };
 
@@ -14,11 +14,11 @@ function safeToString(value: unknown): string {
 	}
 }
 
-function checkFunctionKeywords(obj: unknown, keywords: string[]): boolean {
+function checkFunctionKeywords(obj: unknown, keywords: string[], inverseKeywords: string[] = []): boolean {
 	if (typeof obj !== "function") return false;
 	const str = safeToString(obj);
 
-	return keywords.every(k => str.includes(k));
+	return keywords.every(k => str.includes(k)) && inverseKeywords.every(k => !str.includes(k));
 }
 
 export class SpotifyModules {
@@ -76,11 +76,12 @@ export class SpotifyModules {
 	private static getValueFiltered(cacheKey: string, filterFn: (m: unknown) => unknown): unknown | null {
 		return this.getValue(cacheKey, () => {
 			const candidates = this.modules!.filter(filterFn);
+            const candidatesDedup = [...new Set(candidates)];
 
-			if (candidates.length === 1) {
+			if (candidatesDedup.length === 1) {
 				return {
 					state: "succeeded",
-					value: candidates[0]
+					value: candidatesDedup[0]
 				};
 			} else {
 				return {
@@ -164,5 +165,27 @@ export class SpotifyModules {
 					"disableVendorPrefixes"
 				])
 		);
+	}
+
+	public static getHeartRenderer(): HeartACRendererMemo | null {
+		return this.getValueFiltered("heartRenderer", (m: any) =>
+			checkFunctionKeywords(m?.type, ["remove-from-library", "add-to-library", "className"], ["isEpisode"])
+		) as HeartACRendererMemo | null;
+	}
+
+	public static getAlignedCurationRenderer(): HeartACRendererMemo | null {
+		return this.getValueFiltered(
+			"alignedCurationRenderer",
+			(m: any) =>
+				m &&
+				typeof m === "object" &&
+				m["$$typeof"] === Symbol.for("react.memo") &&
+				checkFunctionKeywords(m.type, [
+					"defaultCurationContextUri",
+					"web-player.aligned-curation",
+					"isCurated",
+					"default-curation"
+				])
+		) as HeartACRendererMemo | null;
 	}
 }
