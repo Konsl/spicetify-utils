@@ -21,6 +21,31 @@ function checkFunctionKeywords(obj: unknown, keywords: string[], inverseKeywords
 	return keywords.every(k => str.includes(k)) && inverseKeywords.every(k => !str.includes(k));
 }
 
+function checkEsperantoService(obj: unknown, serviceId: string): boolean {
+	if (typeof obj !== "function") return false;
+	if (!("SERVICE_ID" in obj)) return false;
+
+	return obj.SERVICE_ID === serviceId;
+}
+
+function checkReactMemo(obj: unknown): obj is { type: unknown } {
+	if (!obj || typeof obj !== "object") return false;
+	if (!("$$typeof" in obj)) return false;
+	if (obj["$$typeof"] !== Symbol.for("react.memo")) return false;
+	if (!("type" in obj)) return false;
+
+	return true;
+}
+
+function checkReactForwardRef(obj: unknown): obj is { render: unknown } {
+	if (!obj || typeof obj !== "object") return false;
+	if (!("$$typeof" in obj)) return false;
+	if (obj["$$typeof"] !== Symbol.for("react.forward_ref")) return false;
+	if (!("render" in obj)) return false;
+
+	return true;
+}
+
 export class SpotifyModules {
 	private static webpack: any | null = null;
 	private static require: any | null = null;
@@ -76,7 +101,7 @@ export class SpotifyModules {
 	private static getValueFiltered(cacheKey: string, filterFn: (m: unknown) => unknown): unknown | null {
 		return this.getValue(cacheKey, () => {
 			const candidates = this.modules!.filter(filterFn);
-            const candidatesDedup = [...new Set(candidates)];
+			const candidatesDedup = [...new Set(candidates)];
 
 			if (candidatesDedup.length === 1) {
 				return {
@@ -92,41 +117,28 @@ export class SpotifyModules {
 	}
 
 	public static getMetadataService(): unknown | null {
-		return this.getValueFiltered(
-			"metadataService",
-			m =>
-				m &&
-				typeof m === "function" &&
-				"SERVICE_ID" in m &&
-				m.SERVICE_ID === "spotify.mdata_esperanto.proto.MetadataService"
+		return this.getValueFiltered("metadataService", m =>
+			checkEsperantoService(m, "spotify.mdata_esperanto.proto.MetadataService")
 		);
 	}
 
 	public static getOfflinePlayableCache(): unknown | null {
-		return this.getValueFiltered(
-			"offlinePlayableCache",
-			m =>
-				m &&
-				typeof m === "function" &&
-				"SERVICE_ID" in m &&
-				m.SERVICE_ID === "spotify.offline_playable_cache_esperanto.proto.OfflinePlayableCache"
+		return this.getValueFiltered("offlinePlayableCache", m =>
+			checkEsperantoService(m, "spotify.offline_playable_cache_esperanto.proto.OfflinePlayableCache")
 		);
 	}
 
 	public static getCreateTransport(): unknown | null {
-		return this.getValueFiltered(
-			"createTransport",
-			m => m && checkFunctionKeywords(m, ["executeEsperantoCall", "cancelEsperantoCall"])
+		return this.getValueFiltered("createTransport", m =>
+			checkFunctionKeywords(m, ["executeEsperantoCall", "cancelEsperantoCall"])
 		);
 	}
 
 	public static getTrackList(): unknown | null {
 		return this.getValueFiltered(
 			"trackList",
-			(m: any) =>
-				m &&
-				typeof m === "object" &&
-				m["$$typeof"] === Symbol.for("react.memo") &&
+			m =>
+				checkReactMemo(m) &&
 				checkFunctionKeywords(m.type, ["tracks", "nrTracks", "fetchTracks", "itemsCache", "initialItems"])
 		);
 	}
@@ -134,10 +146,8 @@ export class SpotifyModules {
 	public static getTrackListItem(): unknown | null {
 		return this.getValueFiltered(
 			"trackListItem",
-			(m: any) =>
-				m &&
-				typeof m === "object" &&
-				m["$$typeof"] === Symbol.for("react.memo") &&
+			m =>
+				checkReactMemo(m) &&
 				checkFunctionKeywords(m.type, ["displayedColumns", "albumOrShow", "associatedAudioUri"])
 		);
 	}
@@ -145,41 +155,35 @@ export class SpotifyModules {
 	public static getCardRenderer(): ReactForwardRef | null {
 		return this.getValueFiltered(
 			"cardRenderer",
-			m =>
-				m &&
-				typeof m === "object" &&
-				"render" in m &&
-				checkFunctionKeywords(m.render, ["card-title-", "card-subtitle-"])
+			m => checkReactForwardRef(m) && checkFunctionKeywords(m.render, ["card-title-", "card-subtitle-"])
 		) as ReactForwardRef | null;
 	}
 
 	public static getStyleSheetManager(): unknown | null {
-		return this.getValueFiltered(
-			"styleSheetManager",
-			m =>
-				m &&
-				checkFunctionKeywords(m, [
-					"stylisPlugins",
-					"reconstructWithOptions",
-					"disableCSSOMInjection",
-					"disableVendorPrefixes"
-				])
+		return this.getValueFiltered("styleSheetManager", m =>
+			checkFunctionKeywords(m, [
+				"stylisPlugins",
+				"reconstructWithOptions",
+				"disableCSSOMInjection",
+				"disableVendorPrefixes"
+			])
 		);
 	}
 
 	public static getHeartRenderer(): HeartACRendererMemo | null {
-		return this.getValueFiltered("heartRenderer", (m: any) =>
-			checkFunctionKeywords(m?.type, ["remove-from-library", "add-to-library", "className"], ["isEpisode"])
+		return this.getValueFiltered(
+			"heartRenderer",
+			m =>
+				checkReactMemo(m) &&
+				checkFunctionKeywords(m.type, ["remove-from-library", "add-to-library", "className"], ["isEpisode"])
 		) as HeartACRendererMemo | null;
 	}
 
 	public static getAlignedCurationRenderer(): HeartACRendererMemo | null {
 		return this.getValueFiltered(
 			"alignedCurationRenderer",
-			(m: any) =>
-				m &&
-				typeof m === "object" &&
-				m["$$typeof"] === Symbol.for("react.memo") &&
+			m =>
+				checkReactMemo(m) &&
 				checkFunctionKeywords(m.type, [
 					"defaultCurationContextUri",
 					"web-player.aligned-curation",
