@@ -3,7 +3,9 @@ import { SpotifyModules } from "./modules";
 export enum ExtensionKind {
 	UNKNOWN_EXTENSION = 0,
 	TRACK_V4 = 10, // type.googleapis.com/spotify.metadata.Track
-	EXTRACTED_COLOR = 23 // type.googleapis.com/spotify.context_track_color.ColorResult
+	EXTRACTED_COLOR = 23, // type.googleapis.com/spotify.context_track_color.ColorResult
+	COVER_IMAGE = 79, // type.googleapis.com/spotify.bumblebee.coverimage.v1.CoverImage
+	ARTWORK_TRAIT = 129 // type.googleapis.com/spotify.contentagnostic.ArtworkTrait
 }
 
 export enum CacheStatus {
