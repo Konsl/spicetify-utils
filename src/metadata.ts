@@ -5,7 +5,11 @@ export enum ExtensionKind {
 	TRACK_V4 = 10, // type.googleapis.com/spotify.metadata.Track
 	EXTRACTED_COLOR = 23, // type.googleapis.com/spotify.context_track_color.ColorResult
 	COVER_IMAGE = 79, // type.googleapis.com/spotify.bumblebee.coverimage.v1.CoverImage
-	ARTWORK_TRAIT = 129 // type.googleapis.com/spotify.contentagnostic.ArtworkTrait
+	ARTWORK_TRAIT = 129, // type.googleapis.com/spotify.contentagnostic.ArtworkTrait
+	BEATS = 217, // type.googleapis.com/spotify.playlistmixing.extensions.mixbeats.Beats
+	VOCAL_ACTIVITY = 218, // type.googleapis.com/spotify.playlistmixing.extensions.mixvocalactivity.VocalActivity
+	AUDIO_ATTRIBUTES_V2 = 222, // type.googleapis.com/spotify.playlistmixing.extensions.audio_attributes.v2.AudioAttributes
+	THREEBAND_WAVEFORMS = 237 // type.googleapis.com/spotify.playlistmixing.extensions.mixthreebandwaveforms.ThreeBandWaveforms
 }
 
 export enum CacheStatus {
