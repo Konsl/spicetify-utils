@@ -54,7 +54,7 @@ export class SpotifyModules {
 	private static loadedModules: Record<string, ModuleState> = {};
 
 	private static init() {
-		this.webpack = (window as any).webpackChunkclient_web ?? (window as any).webpackChunkopen;
+		this.webpack = (window as any).rspackChunkclient_web ?? (window as any).webpackChunkclient_web ?? (window as any).webpackChunkopen;
 		this.require = this.webpack.push([[Symbol()], {}, (re: any) => re]);
 
 		this.refreshModules();
